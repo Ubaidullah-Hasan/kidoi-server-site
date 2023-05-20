@@ -33,11 +33,17 @@ async function run() {
 
         
         app.get("/toys", async(req, res) => {
-            const cursor = toyCollection.find();
+            const toys = parseInt(req.query.limit) || 20;
+            const cursor = toyCollection.find().limit(toys);
             const result = await cursor.toArray();
             res.send(result);
         })
 
+        app.get("/totalToys", async(req, res) => {
+            const result = await toyCollection.estimatedDocumentCount();
+            console.log(result);
+            res.send({totalToy: result});
+        })
 
 
         // Send a ping to confirm a successful connection
