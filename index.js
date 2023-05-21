@@ -29,13 +29,13 @@ async function run() {
         // Connect the client to the server	(optional starting in v4.7)
         // await client.connect();
 
-        const toyCollection = client.db("kidoi_toys").collection("toys");
 
+
+        const toyCollection = client.db("kidoi_toys").collection("toys");
         
         app.get("/toys", async(req, res) => {
             const toys = parseInt(req.query.limit) || 20;
             const searchQuery = req.query.search || "";
-            console.log(searchQuery)
             const query = {
                 name: { $regex: searchQuery, $options: 'i' }, // Case-insensitive search
             };
@@ -44,11 +44,49 @@ async function run() {
             res.send(result);
         })
 
+        app.get("/toysUser", async(req, res) => {
+            const email = req.query.email;
+            console.log(email)
+            let query = {}
+            if(req.query?.email){
+                query = {email: email}
+            }
+            const result = await toyCollection.find(query).toArray()
+            res.send(result);
+        })
+
+        app.get("/toys/:id", async(req, res) => {
+            const id = req.params.id;
+            const query = {_id: new ObjectId(id)}
+            const result = await toyCollection.findOne(query);
+            res.send(result);
+            console.log(id)
+        })
+
+        // toy filter by category
+        app.get("/toy", async(req, res) => {
+            const category = (req.query.category);
+            console.log(category)
+            // const query = { subCategory: new ObjectId(category)}
+            const query = {
+                subCategory: { $regex: category, $options: 'i' }, // Case-insensitive search
+            };
+            const cursor = toyCollection.find(query).limit(3);
+            const result = await cursor.toArray();
+            res.send(result);
+        }) 
+
+
         app.get("/totalToys", async(req, res) => {
             const result = await toyCollection.estimatedDocumentCount();
-            console.log(result);
             res.send({totalToy: result});
         })
+
+
+
+
+
+
 
 
         // Send a ping to confirm a successful connection
