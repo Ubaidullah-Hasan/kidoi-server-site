@@ -33,6 +33,14 @@ async function run() {
 
         const toyCollection = client.db("kidoi_toys").collection("toys");
         
+        app.post("/toys", async(req, res) => {
+            const addToy = req.body;
+            console.log(addToy)
+            const result = await toyCollection.insertOne(addToy);
+            res.send(result);
+        })
+
+
         app.get("/toys", async(req, res) => {
             const toys = parseInt(req.query.limit) || 20;
             const searchQuery = req.query.search || "";
@@ -60,7 +68,31 @@ async function run() {
             const query = {_id: new ObjectId(id)}
             const result = await toyCollection.findOne(query);
             res.send(result);
+        })
+
+        app.put("/toys/:id", async(req, res)=> {
+            const id = req.params.id;
+            const update = req.body;
+            console.log(id, update);
+            const filter = {_id: new ObjectId(id)}
+            const options = {upsert: true}
+            const updatedToy = {
+                $set:{
+                    price: update.price,
+                    quantity: update.quantity,
+                    details: update.description
+                }
+            }
+            const result = await toyCollection.updateOne(filter, updatedToy, options)
+            res.send(result)
+        })
+
+        app.delete("/toys/:id", async(req, res) => {
+            const id = req.params.id;
             console.log(id)
+            const query = {_id: new ObjectId(id)}
+            const result = await toyCollection.deleteOne(query);
+            res.send(result)
         })
 
         // toy filter by category
