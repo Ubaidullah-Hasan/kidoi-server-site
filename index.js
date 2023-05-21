@@ -34,7 +34,12 @@ async function run() {
         
         app.get("/toys", async(req, res) => {
             const toys = parseInt(req.query.limit) || 20;
-            const cursor = toyCollection.find().limit(toys);
+            const searchQuery = req.query.search || "";
+            console.log(searchQuery)
+            const query = {
+                name: { $regex: searchQuery, $options: 'i' }, // Case-insensitive search
+            };
+            const cursor = toyCollection.find(query).limit(toys);
             const result = await cursor.toArray();
             res.send(result);
         })
