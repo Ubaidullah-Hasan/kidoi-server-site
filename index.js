@@ -6,7 +6,12 @@ const app = express()
 const port = process.env.PORT || 3000
 
 // use middlewire
-app.use(cors())
+const corsConfig = {
+    origin: '*',
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE']
+}
+app.use(cors(corsConfig))
 app.use(express.json())
 
 /*************************************
@@ -59,7 +64,8 @@ async function run() {
             if(req.query?.email){
                 query = {email: email}
             }
-            const result = await toyCollection.find(query).toArray()
+            const lowToHigePrice = { price: 1};
+            const result = await toyCollection.find(query).sort(lowToHigePrice).toArray()
             res.send(result);
         })
 
